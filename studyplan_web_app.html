@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPT StudyPlan - Lương Kỳ Duyên (K22)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fpt: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Heatmap cell active classes */
+        .streak-lvl-0 { background-color: #f1f5f9; }
+        .streak-lvl-1 { background-color: #ffedd5; }
+        .streak-lvl-2 { background-color: #fdba74; }
+        .streak-lvl-3 { background-color: #f97316; }
+        .streak-lvl-4 { background-color: #ea580c; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-orange-500 selection:text-white">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col hidden md:flex shrink-0 border-r border-slate-800">
+            <!-- Brand / Logo FPT -->
+            <div class="h-20 flex items-center px-6 gap-3 border-b border-slate-800/80 bg-slate-950/40">
+                <div class="bg-orange-500 text-white p-2 rounded-xl shadow-lg shadow-orange-500/20 font-black text-xl tracking-tighter">
+                    FPT
+                </div>
+                <div>
+                    <h1 class="text-white font-extrabold text-base tracking-wide">StudyPlan</h1>
+                    <p class="text-[11px] text-orange-400 font-medium">Campus FPTU • K22</p>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-sm transition-all">
+                    <i class="fa-solid fa-chart-pie w-5 text-orange-500"></i> Tổng quan
+                </button>
+                <button onclick="switchTab('streak')" id="nav-streak" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-sm transition-all">
+                    <i class="fa-solid fa-fire w-5 text-orange-500"></i> Chuỗi Học Tập & Thói Quen
+                </button>
+                <button onclick="switchTab('mistakes')" id="nav-mistakes" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-sm transition-all">
+                    <i class="fa-solid fa-bug w-5 text-rose-500"></i> Lỗi Sai & Bài Học
+                </button>
+                <button onclick="switchTab('courses')" id="nav-courses" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-sm transition-all">
+                    <i class="fa-solid fa-book-bookmark w-5 text-orange-500"></i> Môn học kỳ này
+                </button>
+                <button onclick="switchTab('timetable')" id="nav-timetable" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-sm transition-all">
+                    <i class="fa-solid fa-calendar-days w-5 text-orange-500"></i> Thời khóa biểu
+                </button>
+                <button onclick="switchTab('tasks')" id="nav-tasks" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-sm transition-all">
+                    <i class="fa-solid fa-list-check w-5 text-orange-500"></i> Bài tập & Deadline
+                </button>
+                <button onclick="switchTab('notes')" id="nav-notes" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-sm transition-all">
+                    <i class="fa-solid fa-folder-open w-5 text-orange-500"></i> Tài liệu & Ghi chú
+                </button>
+                <button onclick="switchTab('gpa')" id="nav-gpa" class="nav-btn w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-sm transition-all">
+                    <i class="fa-solid fa-calculator w-5 text-orange-500"></i> Tính điểm GPA
+                </button>
+            </nav>
+
+            <!-- User Profile Card -->
+            <div class="p-4 border-t border-slate-800 flex items-center gap-3 bg-slate-950/60">
+                <div class="relative">
+                    <div class="w-10 h-10 rounded-full bg-orange-500 text-white font-black flex items-center justify-center border-2 border-orange-400 shadow-sm text-sm">
+                        KD
+                    </div>
+                    <span class="w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-900 absolute bottom-0 right-0"></span>
+                </div>
+                <div class="overflow-hidden">
+                    <h4 class="text-white text-sm font-bold truncate">Lương Kỳ Duyên</h4>
+                    <p class="text-xs text-slate-400 truncate">K22 • Đại học FPT</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="flex-1 flex flex-col overflow-y-auto min-w-0">
+            
+            <!-- TOP HEADER -->
+            <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-6 lg:px-8 sticky top-0 z-20 shadow-xs">
+                <div class="flex items-center gap-4">
+                    <button class="md:hidden text-slate-600 hover:text-slate-900 text-xl"><i class="fa-solid fa-bars"></i></button>
+                    <div>
+                        <h2 class="text-lg lg:text-xl font-extrabold text-slate-900">Xin chào, Kỳ Duyên! 🍊</h2>
+                        <p class="text-xs text-slate-500 hidden sm:block" id="current-date-display">Chúc bạn một ngày học tập xuất sắc tại FPT K22!</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <!-- Daily Checkin Shortcut -->
+                    <button id="btn-header-checkin" onclick="checkInToday()" class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-md shadow-orange-500/20 flex items-center gap-2">
+                        <i class="fa-solid fa-fire text-amber-200"></i>
+                        <span id="header-checkin-text">Điểm danh học tập</span>
+                    </button>
+
+                    <!-- Add Mistake Quick Action -->
+                    <button onclick="openAddMistakeModal()" class="bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 px-3 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-bug"></i> <span class="hidden sm:inline">Ghi lỗi sai</span>
+                    </button>
+
+                    <!-- Quick Add Task -->
+                    <button onclick="openAddTaskModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2 rounded-xl font-semibold text-xs transition-all shadow-sm flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">Thêm bài tập</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- TABS CONTAINER -->
+            <main class="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl w-full mx-auto">
+                
+                <!-- 1. DASHBOARD TAB -->
+                <div id="tab-dashboard" class="tab-content">
+                    
+                    <!-- TOP STATS CARDS (INTERACTIVE & CLICKABLE) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                        <!-- Card 1: Streak -->
+                        <div onclick="switchTab('streak')" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4 cursor-pointer hover:border-orange-400 hover:shadow-md transition-all group">
+                            <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 group-hover:bg-orange-500 group-hover:text-white transition-all flex items-center justify-center text-xl font-bold">
+                                <i class="fa-solid fa-fire-flame-curved"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-1">
+                                    <p class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Chuỗi Học Tập</p>
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-300 group-hover:text-orange-500"></i>
+                                </div>
+                                <h3 class="text-xl font-extrabold text-slate-900 mt-0.5" id="stat-streak-count">0 Ngày 🔥</h3>
+                                <span class="text-[11px] text-orange-600 font-semibold" id="stat-streak-status">Xem ma trận thói quen →</span>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Courses -->
+                        <div onclick="switchTab('courses')" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4 cursor-pointer hover:border-blue-400 hover:shadow-md transition-all group">
+                            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all flex items-center justify-center text-xl font-bold">
+                                <i class="fa-solid fa-book-open"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-1">
+                                    <p class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Môn kỳ này</p>
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-300 group-hover:text-blue-500"></i>
+                                </div>
+                                <h3 class="text-xl font-extrabold text-slate-900 mt-0.5" id="stat-course-count">5 Môn</h3>
+                                <span class="text-[11px] text-blue-600 font-semibold">Xem chi tiết tín chỉ →</span>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Deadline -->
+                        <div onclick="switchTab('tasks', 'pending')" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4 cursor-pointer hover:border-rose-400 hover:shadow-md transition-all group">
+                            <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 group-hover:bg-rose-600 group-hover:text-white transition-all flex items-center justify-center text-xl font-bold">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-1">
+                                    <p class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Deadline Cần Làm</p>
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-300 group-hover:text-rose-500"></i>
+                                </div>
+                                <h3 class="text-xl font-extrabold text-slate-900 mt-0.5" id="stat-pending-tasks">0 Bài</h3>
+                                <span class="text-[11px] text-rose-500 font-semibold">Lọc bài chưa hoàn thành →</span>
+                            </div>
+                        </div>
+
+                        <!-- Card 4: GPA -->
+                        <div onclick="switchTab('gpa')" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4 cursor-pointer hover:border-purple-400 hover:shadow-md transition-all group">
+                            <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-all flex items-center justify-center text-xl font-bold">
+                                <i class="fa-solid fa-award"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-1">
+                                    <p class="text-xs font-semibold uppercase text-slate-400 tracking-wider">GPA Dự Kiến</p>
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-300 group-hover:text-purple-500"></i>
+                                </div>
+                                <h3 class="text-xl font-extrabold text-slate-900 mt-0.5" id="dash-gpa-display">3.65 <span class="text-xs text-slate-400 font-normal">/ 4.0</span></h3>
+                                <span class="text-[11px] text-purple-600 font-semibold">Xem bảng quy đổi →</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DASHBOARD CONTENT GRID -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        
+                        <!-- LEFT 2 COLS -->
+                        <div class="lg:col-span-2 space-y-8">
+                            
+                            <!-- Study Streak & Habit Overview Widget -->
+                            <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 rounded-2xl shadow-md border border-slate-800 relative overflow-hidden">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold text-lg">
+                                            <i class="fa-solid fa-fire"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-extrabold text-base text-white">Study Streak & Habits Tracker</h3>
+                                            <p class="text-xs text-slate-400">Giữ vững thói quen học tập mỗi ngày cùng FPT StudyPlan K22</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="switchTab('streak')" class="text-xs bg-orange-500/20 text-orange-400 font-bold px-3 py-1.5 rounded-lg border border-orange-500/30 hover:bg-orange-500/30 transition-all">
+                                        Chi tiết →
+                                    </button>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                    <!-- Streak Banner -->
+                                    <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Kỷ lục streak hiện tại</p>
+                                            <h2 class="text-3xl font-black text-orange-400 mt-0.5" id="dash-streak-banner">12 Ngày 🔥</h2>
+                                        </div>
+                                        <button id="btn-dash-checkin" onclick="checkInToday()" class="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all shadow-md shadow-orange-500/20">
+                                            Điểm danh
+                                        </button>
+                                    </div>
+
+                                    <!-- Quick Habit Checklists -->
+                                    <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 space-y-2">
+                                        <p class="text-[11px] text-slate-400 uppercase font-bold tracking-wider mb-1">Thói quen hôm nay</p>
+                                        <div id="dash-habits-mini" class="space-y-1.5 text-xs">
+                                            <!-- Dynamically rendered -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- MISTAKES HIGHLIGHT WIDGET -->
+                            <div class="bg-white rounded-2xl border border-rose-100 p-6 shadow-xs relative overflow-hidden">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="font-bold text-base text-slate-900 flex items-center gap-2">
+                                        <i class="fa-solid fa-bug text-rose-500"></i> Lỗi sai gần đây & Bài học (Bug Log)
+                                    </h3>
+                                    <button onclick="switchTab('mistakes')" class="text-xs font-bold text-rose-600 hover:underline">Xem nhật ký lỗi →</button>
+                                </div>
+                                <div id="dash-mistakes-preview" class="space-y-3">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- Schedule Today -->
+                            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+                                <div class="flex items-center justify-between mb-5">
+                                    <h3 class="font-bold text-base text-slate-900 flex items-center gap-2">
+                                        <i class="fa-solid fa-calendar-day text-orange-500"></i> Lịch học hôm nay (FPT K22 Slots)
+                                    </h3>
+                                    <span class="text-xs bg-orange-100 text-orange-700 font-bold px-2.5 py-1 rounded-lg">Campus FPT</span>
+                                </div>
+
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between p-4 rounded-xl bg-orange-50/60 border border-orange-100">
+                                        <div class="flex items-center gap-4">
+                                            <div class="bg-orange-500 text-white px-3 py-2 rounded-xl text-center font-extrabold text-xs">
+                                                Slot 1<br><span class="font-normal text-[10px]">07:30 - 09:50</span>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-bold text-slate-900 text-sm">PRF192 - Programming Fundamentals</h4>
+                                                <p class="text-xs text-slate-500 mt-0.5"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i> Phòng AL-R201 • Thầy NamD</p>
+                                            </div>
+                                        </div>
+                                        <span class="px-3 py-1 bg-orange-200 text-orange-800 text-xs font-bold rounded-lg">Slot 1</span>
+                                    </div>
+
+                                    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100">
+                                        <div class="flex items-center gap-4">
+                                            <div class="bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-center font-bold text-xs">
+                                                Slot 3<br><span class="font-normal text-[10px]">12:50 - 15:10</span>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-bold text-slate-900 text-sm">CSD201 - Data Structures & Algorithms</h4>
+                                                <p class="text-xs text-slate-500 mt-0.5"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i> Phòng BE-305 • Cô HoaNT</p>
+                                            </div>
+                                        </div>
+                                        <span class="px-3 py-1 bg-slate-200 text-slate-600 text-xs font-semibold rounded-lg">Slot 3</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tasks List -->
+                            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+                                <div class="flex items-center justify-between mb-5">
+                                    <h3 class="font-bold text-base text-slate-900 flex items-center gap-2">
+                                        <i class="fa-solid fa-list-check text-orange-500"></i> Bài tập & Deadline
+                                    </h3>
+                                    <button onclick="switchTab('tasks')" class="text-xs font-bold text-orange-500 hover:underline">Quản lý tất cả →</button>
+                                </div>
+                                <div id="dashboard-task-list" class="space-y-3">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- RIGHT 1 COL -->
+                        <div class="space-y-8">
+                            
+                            <!-- Pomodoro Timer Widget -->
+                            <div class="bg-slate-900 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden border border-slate-800">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="font-bold text-xs tracking-wider uppercase text-orange-400 flex items-center gap-2">
+                                        <i class="fa-solid fa-stopwatch"></i> Pomodoro Tập Trung
+                                    </h3>
+                                    <span class="text-[10px] bg-slate-800 text-slate-300 font-medium px-2 py-0.5 rounded-full">K22 Focus</span>
+                                </div>
+
+                                <div class="text-center my-6">
+                                    <h1 id="timer-display" class="text-5xl font-black tracking-tight font-mono text-white">25:00</h1>
+                                    <p class="text-xs text-slate-400 mt-2">Tập trung làm bài tập & sửa lỗi code</p>
+                                </div>
+
+                                <div class="flex items-center justify-center gap-3">
+                                    <button onclick="toggleTimer()" id="btn-timer-toggle" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition-all shadow-md shadow-orange-500/20">
+                                        <i class="fa-solid fa-play mr-1"></i> Bắt đầu
+                                    </button>
+                                    <button onclick="resetTimer()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2.5 rounded-xl font-bold text-xs transition-all">
+                                        <i class="fa-solid fa-rotate-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- FPT Links Quick Access -->
+                            <div class="bg-gradient-to-br from-orange-500 to-amber-600 text-white rounded-2xl p-6 shadow-lg">
+                                <h4 class="font-bold text-base mb-1">Cổng thông tin FPTU</h4>
+                                <p class="text-xs text-orange-100 mb-4">Liên kết nhanh hệ thống sinh viên K22</p>
+                                <div class="space-y-2 text-xs font-semibold">
+                                    <a href="https://fap.fpt.edu.vn" target="_blank" class="block p-2.5 rounded-xl bg-white/10 hover:bg-white/20 transition-all flex items-center justify-between">
+                                        <span><i class="fa-solid fa-globe mr-2"></i> FAP FPT (fap.fpt.edu.vn)</span>
+                                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                                    </a>
+                                    <a href="https://coursera.org" target="_blank" class="block p-2.5 rounded-xl bg-white/10 hover:bg-white/20 transition-all flex items-center justify-between">
+                                        <span><i class="fa-solid fa-graduation-cap mr-2"></i> Coursera / LMS FPT</span>
+                                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- 2. STREAK & HABITS TAB -->
+                <div id="tab-streak" class="tab-content">
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-slate-900">Chuỗi Ngày Học Tập & Thói Quen (Study Streak)</h3>
+                        <p class="text-xs text-slate-500">Xây dựng thói quen học tập bền bỉ mỗi ngày cho Kỳ Duyên (K22)</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                        <!-- Main Streak Card -->
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Chuỗi điểm danh</span>
+                                    <span class="text-xs font-extrabold bg-orange-100 text-orange-700 px-2.5 py-1 rounded-lg"><i class="fa-solid fa-fire mr-1"></i> Streak Active</span>
+                                </div>
+                                <div class="mt-4 flex items-baseline gap-2">
+                                    <h1 class="text-5xl font-black text-slate-900" id="streak-page-count">0</h1>
+                                    <span class="text-lg font-bold text-orange-500">Ngày liên tục 🔥</span>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-2">Duy trì điểm danh mỗi ngày để giữ vững phong độ học tập K22!</p>
+                            </div>
+
+                            <button id="btn-streak-page-checkin" onclick="checkInToday()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition-all shadow-md shadow-orange-500/20 text-xs">
+                                Điểm danh học tập hôm nay
+                            </button>
+                        </div>
+
+                        <!-- Habit Tracker Card -->
+                        <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-bold text-slate-900 text-base flex items-center gap-2">
+                                    <i class="fa-solid fa-square-check text-orange-500"></i> Theo dõi thói quen hôm nay (Habit Tracker)
+                                </h4>
+                                <span class="text-xs text-slate-400 font-medium" id="habit-progress-text">0/4 Hoàn thành</span>
+                            </div>
+
+                            <div id="full-habit-list" class="space-y-3">
+                                <!-- Dynamically rendered habits -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HEATMAP MATRIX -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-base flex items-center gap-2">
+                                    <i class="fa-solid fa-border-all text-orange-500"></i> Lịch Điểm Danh Học Tập (Streak Heatmap)
+                                </h4>
+                                <p class="text-xs text-slate-500">Ma trận ghi nhận sự chăm chỉ của Kỳ Duyên trong 30 ngày qua</p>
+                            </div>
+                            <div class="flex items-center gap-2 text-[11px] text-slate-400 font-medium">
+                                <span>Ít</span>
+                                <span class="w-3 h-3 rounded-xs streak-lvl-0 border border-slate-200"></span>
+                                <span class="w-3 h-3 rounded-xs streak-lvl-1"></span>
+                                <span class="w-3 h-3 rounded-xs streak-lvl-2"></span>
+                                <span class="w-3 h-3 rounded-xs streak-lvl-3"></span>
+                                <span class="w-3 h-3 rounded-xs streak-lvl-4"></span>
+                                <span>Nhiều</span>
+                            </div>
+                        </div>
+
+                        <div class="pt-2">
+                            <div id="streak-heatmap" class="grid grid-cols-10 sm:grid-cols-15 md:grid-cols-30 gap-2">
+                                <!-- Dynamically rendered cells -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. MISTAKES & BUG LOG TAB (NEW FEATURE) -->
+                <div id="tab-mistakes" class="tab-content">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                <i class="fa-solid fa-bug text-rose-500"></i> Lỗi Sai & Bài Học Kinh Nghiệm (Bug Log)
+                            </h3>
+                            <p class="text-xs text-slate-500">Lưu lại các lỗi code, sai sót bài tập để không bao giờ lặp lại lỗi cũ trong kỳ kiểm tra FPT</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <input type="text" id="mistake-search" oninput="renderData()" placeholder="Tìm lỗi sai, tên môn..." class="bg-white border border-slate-200 text-xs rounded-xl px-3 py-2 outline-none font-medium focus:border-rose-400 w-48">
+                            <button onclick="openAddMistakeModal()" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> Ghi lỗi sai mới
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="mistakes-list" class="space-y-4">
+                        <!-- Dynamically rendered mistakes -->
+                    </div>
+                </div>
+
+                <!-- 4. COURSES TAB -->
+                <div id="tab-courses" class="tab-content">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">Danh sách Môn học (K22 FPT)</h3>
+                            <p class="text-xs text-slate-500">Quản lý tín chỉ, giảng viên và trạng thái môn học tại FPT</p>
+                        </div>
+                        <button onclick="openAddCourseModal()" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm">
+                            <i class="fa-solid fa-plus mr-1"></i> Thêm môn học
+                        </button>
+                    </div>
+
+                    <div id="courses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </div>
+
+                <!-- 5. TIMETABLE TAB -->
+                <div id="tab-timetable" class="tab-content">
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-slate-900">Thời khóa biểu Tuần (FPT K22 Slots)</h3>
+                        <p class="text-xs text-slate-500">Lịch học Slot 1 đến Slot 6 tại Campus FPT</p>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200 overflow-x-auto shadow-xs">
+                        <table class="w-full text-xs text-left border-collapse min-w-[700px]">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                                    <th class="p-3.5 w-28">Slot / Giờ</th>
+                                    <th class="p-3.5">Thứ 2</th>
+                                    <th class="p-3.5">Thứ 3</th>
+                                    <th class="p-3.5">Thứ 4</th>
+                                    <th class="p-3.5">Thứ 5</th>
+                                    <th class="p-3.5">Thứ 6</th>
+                                    <th class="p-3.5">Thứ 7</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 font-medium">
+                                <tr>
+                                    <td class="p-3 bg-slate-50 font-bold text-slate-600">Slot 1<br><span class="font-normal text-[10px]">07:30 - 09:50</span></td>
+                                    <td class="p-3"><span class="bg-orange-100 text-orange-800 p-2 rounded-lg block font-bold">PRF192 (AL-201)</span></td>
+                                    <td class="p-3 text-slate-400 italic">Nghỉ</td>
+                                    <td class="p-3"><span class="bg-orange-100 text-orange-800 p-2 rounded-lg block font-bold">PRF192 (AL-201)</span></td>
+                                    <td class="p-3"><span class="bg-orange-100 text-orange-800 p-2 rounded-lg block font-bold">PRF192 (AL-201)</span></td>
+                                    <td class="p-3 text-slate-400 italic">Nghỉ</td>
+                                    <td class="p-3 text-slate-400 italic">Nghỉ</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 bg-slate-50 font-bold text-slate-600">Slot 2<br><span class="font-normal text-[10px]">10:00 - 12:20</span></td>
+                                    <td class="p-3 text-slate-400 italic">Nghỉ</td>
+                                    <td class="p-3"><span class="bg-purple-100 text-purple-800 p-2 rounded-lg block font-bold">CEA201 (BE-102)</span></td>
+                                    <td class="p-3 text-slate-400 italic">Nghỉ</td>
+                                    <td class="p-3 text-slate-400 italic">Nghỉ</td>
+                                    <td class="p-3"><span class="bg-purple-100 text-purple-800 p-2 rounded-lg block font-bold">CEA201 (BE-102)</span></td>
+                                    <td class="p-3 text-slate-400 italic">Nghỉ</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 bg-slate-50 font-bold text-slate-600">Slot 3<br><span class="font-normal text-[10px]">12:50 - 15:10</span></td>
+                                    <td class="p-3"><span class="bg-emerald-100 text-emerald-800 p-2 rounded-lg block font-bold">CSD201 (BE-305)</span></td>
+                                    <td class="p-3 text-slate-400 italic">Nghỉ</td>
+                                    <td class="p-3"><span class="bg-emerald-100 text-emerald-800 p-2 rounded-lg block font-bold">CSD201 (BE-305)</span></td>
+                                    <td class="p-3"><span class="bg-emerald-100 text-emerald-800 p-2 rounded-lg block font-bold">CSD201 (BE-305)</span></td>
+                                    <td class="p-3 text-slate-400 italic">Nghỉ</td>
+                                    <td class="p-3 text-slate-400 italic">Nghỉ</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 bg-slate-50 font-bold text-slate-600">Slot 4<br><span class="font-normal text-[10px]">15:20 - 17:40</span></td>
+                                    <td class="p-3 text-slate-400 italic">Nghỉ</td>
+                                    <td class="p-3"><span class="bg-blue-100 text-blue-800 p-2 rounded-lg block font-bold">MAD101 (AL-105)</span></td>
+                                    <td class="p-3 text-slate-400 italic">Nghỉ</td>
+                                    <td class="p-3 text-slate-400 italic">Nghỉ</td>
+                                    <td class="p-3"><span class="bg-blue-100 text-blue-800 p-2 rounded-lg block font-bold">MAD101 (AL-105)</span></td>
+                                    <td class="p-3 text-slate-400 italic">Nghỉ</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 6. TASKS TAB -->
+                <div id="tab-tasks" class="tab-content">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">Quản lý Bài tập & Deadline</h3>
+                            <p class="text-xs text-slate-500">Đánh dấu và theo dõi tiến độ công việc học tập</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <!-- Filter options -->
+                            <select id="task-filter" onchange="renderData()" class="bg-white border border-slate-200 text-xs rounded-xl px-3 py-2 outline-none font-semibold">
+                                <option value="all">Tất cả bài tập</option>
+                                <option value="pending">Chưa hoàn thành</option>
+                                <option value="completed">Đã hoàn thành</option>
+                            </select>
+                            <button onclick="openAddTaskModal()" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm">
+                                <i class="fa-solid fa-plus mr-1"></i> Thêm bài tập
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="all-tasks-list" class="space-y-3">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </div>
+
+                <!-- 7. NOTES TAB -->
+                <div id="tab-notes" class="tab-content">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">Tài liệu & Ghi chú Môn học K22</h3>
+                            <p class="text-xs text-slate-500">Lưu thông tin Lab, Assignment, Workshop cho các môn FPT</p>
+                        </div>
+                        <button onclick="openAddNoteModal()" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm">
+                            <i class="fa-solid fa-plus mr-1"></i> Thêm ghi chú
+                        </button>
+                    </div>
+
+                    <div id="notes-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Dynamically rendered notes -->
+                    </div>
+                </div>
+
+                <!-- 8. GPA CALCULATOR TAB -->
+                <div id="tab-gpa" class="tab-content">
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-slate-900">Tính Điểm GPA Dự Kiến (Chuẩn FPT 4.0)</h3>
+                        <p class="text-xs text-slate-500">Quy đổi điểm hệ 10 sang hệ 4.0 chuẩn tích lũy Đại học FPT K22</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-xs text-left">
+                                    <thead>
+                                        <tr class="border-b border-slate-200 text-slate-400 font-semibold uppercase">
+                                            <th class="pb-3">Môn học K22</th>
+                                            <th class="pb-3 text-center">Tín chỉ</th>
+                                            <th class="pb-3 text-center">Điểm hệ 10</th>
+                                            <th class="pb-3 text-center">Quy đổi 4.0</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="gpa-table-body" class="divide-y divide-slate-100">
+                                        <!-- Rendered dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs h-fit space-y-4 text-center">
+                            <div class="w-20 h-20 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-2xl font-black mx-auto">
+                                <i class="fa-solid fa-graduation-cap"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 font-bold uppercase">GPA Dự Kiến K22</p>
+                                <h1 id="calculated-gpa" class="text-4xl font-black text-slate-900 mt-1">3.65</h1>
+                                <p id="gpa-rank" class="text-xs font-bold text-emerald-600 mt-1">Xếp loại: GIỎI / XUẤT SẮC</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- MODAL 1: ADD MISTAKE / BUG LOG -->
+    <div id="modal-add-mistake" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-base text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-bug text-rose-500"></i> Ghi Nhận Lỗi Sai & Bài Học
+                </h3>
+                <button onclick="closeAddMistakeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs font-semibold">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-600 mb-1">Môn học</label>
+                        <input type="text" id="input-mistake-course" placeholder="VD: CSD201, PRF192" class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:border-rose-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-600 mb-1">Tên bài tập / Bài thi</label>
+                        <input type="text" id="input-mistake-task" placeholder="VD: Practical Exam Question 2" class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:border-rose-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-slate-600 mb-1">Tiêu đề lỗi sai</label>
+                    <input type="text" id="input-mistake-title" placeholder="VD: Lỗi NullPointerException khi duyệt LinkedList" class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:border-rose-500">
+                </div>
+                <div>
+                    <label class="block text-slate-600 mb-1">Nguyên nhân & Code lỗi</label>
+                    <textarea id="input-mistake-reason" rows="3" placeholder="Ghi nhận dòng code sai hoặc lý do nhầm lẫn kiến thức..." class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:border-rose-500 font-mono text-[11px]"></textarea>
+                </div>
+                <div>
+                    <label class="block text-slate-600 mb-1">Cách khắc phục / Bài học rút ra</label>
+                    <textarea id="input-mistake-solution" rows="2" placeholder="Cần kiểm tra null trước khi gọi p.next, khởi tạo Node đúng cách..." class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:border-rose-500"></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeAddMistakeModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold">Hủy</button>
+                <button onclick="saveMistake()" class="px-4 py-2 bg-rose-500 text-white rounded-xl text-xs font-bold hover:bg-rose-600">Lưu nhật ký lỗi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: ADD TASK -->
+    <div id="modal-add-task" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-base text-slate-900">Thêm Nhiệm vụ / Bài tập mới</h3>
+                <button onclick="closeAddTaskModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs font-semibold">
+                <div>
+                    <label class="block text-slate-600 mb-1">Tên bài tập / Nhiệm vụ</label>
+                    <input type="text" id="input-task-title" placeholder="VD: Làm Quiz 1 CSD201" class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:border-orange-500">
+                </div>
+                <div>
+                    <label class="block text-slate-600 mb-1">Môn học</label>
+                    <input type="text" id="input-task-course" placeholder="VD: CSD201" class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:border-orange-500">
+                </div>
+                <div>
+                    <label class="block text-slate-600 mb-1">Hạn nộp (Deadline)</label>
+                    <input type="text" id="input-task-deadline" placeholder="VD: Hôm nay, 23:59" class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:border-orange-500">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeAddTaskModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold">Hủy</button>
+                <button onclick="saveTask()" class="px-4 py-2 bg-orange-500 text-white rounded-xl text-xs font-bold hover:bg-orange-600">Lưu bài tập</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: ADD COURSE -->
+    <div id="modal-add-course" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-base text-slate-900">Thêm Môn học mới (K22)</h3>
+                <button onclick="closeAddCourseModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs font-semibold">
+                <div>
+                    <label class="block text-slate-600 mb-1">Mã môn (FPT Code)</label>
+                    <input type="text" id="input-course-code" placeholder="VD: CSD201" class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:border-orange-500">
+                </div>
+                <div>
+                    <label class="block text-slate-600 mb-1">Tên môn học</label>
+                    <input type="text" id="input-course-name" placeholder="VD: Data Structures & Algorithms" class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:border-orange-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-600 mb-1">Số tín chỉ</label>
+                        <input type="number" id="input-course-credits" value="3" class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:border-orange-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-600 mb-1">Điểm dự kiến/hiện tại</label>
+                        <input type="number" step="0.1" id="input-course-score" placeholder="VD: 8.5" class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:border-orange-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-slate-600 mb-1">Giảng viên</label>
+                    <input type="text" id="input-course-teacher" placeholder="VD: Cô HoaNT" class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:border-orange-500">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeAddCourseModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold">Hủy</button>
+                <button onclick="saveCourse()" class="px-4 py-2 bg-orange-500 text-white rounded-xl text-xs font-bold hover:bg-orange-600">Lưu môn học</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: ADD NOTE -->
+    <div id="modal-add-note" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-base text-slate-900">Thêm Ghi chú / Tài liệu</h3>
+                <button onclick="closeAddNoteModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs font-semibold">
+                <div>
+                    <label class="block text-slate-600 mb-1">Môn học</label>
+                    <input type="text" id="input-note-course" placeholder="VD: CSD201" class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:border-orange-500">
+                </div>
+                <div>
+                    <label class="block text-slate-600 mb-1">Tiêu đề ghi chú</label>
+                    <input type="text" id="input-note-title" placeholder="VD: Ôn tập thuật toán BST & AVL Tree" class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:border-orange-500">
+                </div>
+                <div>
+                    <label class="block text-slate-600 mb-1">Nội dung ghi chú</label>
+                    <textarea id="input-note-content" rows="4" placeholder="Nhập ghi chú quan trọng..." class="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:border-orange-500"></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeAddNoteModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold">Hủy</button>
+                <button onclick="saveNote()" class="px-4 py-2 bg-orange-500 text-white rounded-xl text-xs font-bold hover:bg-orange-600">Lưu ghi chú</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APP LOGIC -->
+    <script>
+        // Get today date string YYYY-MM-DD
+        const getTodayStr = () => new Date().toISOString().split('T')[0];
+
+        // Generate sample heatmaps
+        function generateDefaultHeatmap() {
+            const list = [];
+            for (let i = 29; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+                const level = (i === 0) ? 3 : Math.floor(Math.random() * 4);
+                list.push({ date: dateStr, level: level });
+            }
+            return list;
+        }
+
+        // Default Sample Data for Lương Kỳ Duyên (K22 - FPT University)
+        const defaultData = {
+            streakCount: 15,
+            lastCheckedIn: getTodayStr(),
+            heatmap: generateDefaultHeatmap(),
+            habits: [
+                { id: 1, name: 'Đọc slide CSD201 / PRF192 30p', done: true },
+                { id: 2, name: 'Làm Quiz / Lab Coursera K22', done: false },
+                { id: 3, name: 'Luyện Code C/C++ & Java trên LeetCode', done: true },
+                { id: 4, name: 'Review nhật ký lỗi sai (Bug Log)', done: true }
+            ],
+            mistakes: [
+                {
+                    id: 1,
+                    course: 'CSD201',
+                    task: 'Practical Exam 1',
+                    title: 'Lỗi NullPointerException khi xóa Node trong Binary Search Tree',
+                    reason: 'Lúc duyệt cây tìm node cần xóa quên check p == null trước khi truy cập p.left hoặc p.right.',
+                    solution: 'Thêm điều kiện `if (p == null) return null;` ở ngay đầu hàm recursive xóa node.',
+                    fixed: false,
+                    date: '14/10/2026'
+                },
+                {
+                    id: 2,
+                    course: 'PRF192',
+                    task: 'Assignment 2 (C Language)',
+                    title: 'Lỗi trôi lệnh khi dùng scanf("%c") sau scanf("%d")',
+                    reason: 'Ký tự enter (newline) sau khi nhập số nguyên còn lưu trong bộ đệm stdin khiến scanf("%c") đọc nhầm.',
+                    solution: 'Dùng `fflush(stdin)` hoặc thêm khoảng trắng trước `%c` trong định dạng: `scanf(" %c", &ch)`.',
+                    fixed: true,
+                    date: '10/10/2026'
+                }
+            ],
+            courses: [
+                { id: 1, code: 'PRF192', name: 'Programming Fundamentals', credits: 3, teacher: 'Thầy NamD', score: 8.8 },
+                { id: 2, code: 'CSD201', name: 'Data Structures & Algorithms', credits: 3, teacher: 'Cô HoaNT', score: 9.0 },
+                { id: 3, code: 'CEA201', name: 'Computer Organization & Architecture', credits: 3, teacher: 'Thầy TùngNT', score: 8.2 },
+                { id: 4, code: 'MAD101', name: 'Discrete Mathematics', credits: 3, teacher: 'Cô LanP', score: 9.5 },
+                { id: 5, code: 'JPD123', name: 'Japanese Elementary 1', credits: 3, teacher: 'Cô Yamada', score: 9.0 }
+            ],
+            tasks: [
+                { id: 1, title: 'Nộp Lab 4: LinkedList & Queue Implementation', course: 'CSD201', deadline: 'Hôm nay, 23:59', priority: 'High', completed: false },
+                { id: 2, title: 'Giải bối cảnh bài tập Logic đếm đồ thị', course: 'MAD101', deadline: 'Thứ 6 tuần này', priority: 'High', completed: false },
+                { id: 3, title: 'Hoàn thành Quiz 3 Assembly & RISC-V', course: 'CEA201', deadline: 'Chủ Nhật', priority: 'Medium', completed: true }
+            ],
+            notes: [
+                { id: 1, course: 'CSD201', title: 'Công thức cân bằng cây AVL Tree & Các phép xoay', title: 'AVL Tree Rotation', content: 'Ghi nhớ 4 trường hợp xoay: LL (xoay phải), RR (xoay trái), LR (xoay trái node con rồi xoay phải), RL (xoay phải node con rồi xoay trái)...', date: '12/10/2026' },
+                { id: 2, course: 'PRF192', title: 'Quản lý bộ nhớ động C: malloc vs calloc', content: 'malloc(size) không khởi tạo giá trị ban đầu, calloc(num, size) gán giá trị 0. Luôn nhớ dùng free(ptr) sau khi dùng xong để tránh memory leak!', date: '14/10/2026' }
+            ]
+        };
+
+        // Local Storage Sync (K22 Specific key)
+        let appData = JSON.parse(localStorage.getItem('fpt_studyplan_duyen_k22')) || defaultData;
+
+        function saveData() {
+            localStorage.setItem('fpt_studyplan_duyen_k22', JSON.stringify(appData));
+            renderData();
+        }
+
+        // Tab Switcher with Optional Filter Param
+        function switchTab(tabId, filterOption = null) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('bg-orange-500', 'text-white', 'shadow-md');
+                el.classList.add('text-slate-400');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.classList.add('bg-orange-500', 'text-white', 'shadow-md');
+                activeNav.classList.remove('text-slate-400');
+            }
+
+            // Apply filter options if passed
+            if (tabId === 'tasks' && filterOption) {
+                const filterSelect = document.getElementById('task-filter');
+                if (filterSelect) {
+                    filterSelect.value = filterOption;
+                    renderData();
+                }
+            }
+        }
+
+        // Daily Streak Check-in Logic
+        function checkInToday() {
+            const today = getTodayStr();
+            if (appData.lastCheckedIn === today) {
+                alert("Kỳ Duyên đã điểm danh hôm nay rồi! Tiếp tục giữ vững phong độ học tập K22 nhé 🔥");
+                return;
+            }
+
+            appData.streakCount += 1;
+            appData.lastCheckedIn = today;
+
+            const todayItem = appData.heatmap.find(h => h.date === today);
+            if (todayItem) {
+                todayItem.level = 4;
+            } else {
+                appData.heatmap.push({ date: today, level: 4 });
+            }
+
+            saveData();
+            alert("🎉 Tuyệt vời! Bạn đã điểm danh thành công ngày hôm nay!");
+        }
+
+        // Render All Views dynamically
+        function renderData() {
+            const today = getTodayStr();
+            const isCheckedInToday = appData.lastCheckedIn === today;
+
+            // Render Streak UI
+            document.getElementById('stat-streak-count').innerText = `${appData.streakCount} Ngày 🔥`;
+            document.getElementById('stat-streak-status').innerText = isCheckedInToday ? 'Đã điểm danh hôm nay ✓' : 'Chưa điểm danh hôm nay';
+            document.getElementById('dash-streak-banner').innerText = `${appData.streakCount} Ngày 🔥`;
+            document.getElementById('streak-page-count').innerText = appData.streakCount;
+
+            const headerBtnText = document.getElementById('header-checkin-text');
+            if (isCheckedInToday) {
+                headerBtnText.innerText = 'Đã điểm danh hôm nay ✓';
+            } else {
+                headerBtnText.innerText = 'Điểm danh học tập';
+            }
+
+            // Habits Mini List (Dashboard)
+            const dashHabitsMini = document.getElementById('dash-habits-mini');
+            dashHabitsMini.innerHTML = '';
+            appData.habits.slice(0, 3).forEach(habit => {
+                dashHabitsMini.innerHTML += `
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" ${habit.done ? 'checked' : ''} onchange="toggleHabit(${habit.id})" class="w-3.5 h-3.5 rounded text-orange-500 focus:ring-orange-500 cursor-pointer">
+                        <span class="${habit.done ? 'line-through text-slate-500' : 'text-slate-300'}">${habit.name}</span>
+                    </div>
+                `;
+            });
+
+            // Habits Full List (Streak Tab)
+            const fullHabitList = document.getElementById('full-habit-list');
+            fullHabitList.innerHTML = '';
+            let habitsDoneCount = 0;
+            appData.habits.forEach(habit => {
+                if (habit.done) habitsDoneCount++;
+                fullHabitList.innerHTML += `
+                    <div class="flex items-center justify-between p-3.5 rounded-xl border border-slate-100 hover:border-slate-200 transition-all bg-slate-50/50">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" ${habit.done ? 'checked' : ''} onchange="toggleHabit(${habit.id})" class="w-4 h-4 rounded text-orange-500 focus:ring-orange-500 cursor-pointer">
+                            <span class="font-semibold text-xs sm:text-sm ${habit.done ? 'line-through text-slate-400' : 'text-slate-800'}">${habit.name}</span>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${habit.done ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}">
+                            ${habit.done ? 'Hoàn thành' : 'Chưa làm'}
+                        </span>
+                    </div>
+                `;
+            });
+            document.getElementById('habit-progress-text').innerText = `${habitsDoneCount}/${appData.habits.length} Hoàn thành`;
+
+            // Streak Heatmap Matrix
+            const heatmapContainer = document.getElementById('streak-heatmap');
+            heatmapContainer.innerHTML = '';
+            appData.heatmap.forEach(cell => {
+                heatmapContainer.innerHTML += `
+                    <div title="${cell.date}" class="h-6 w-full rounded-md streak-lvl-${cell.level} border border-slate-200/50 transition-all hover:scale-110 cursor-pointer"></div>
+                `;
+            });
+
+            // Render Dashboard Mistakes Preview
+            const dashMistakes = document.getElementById('dash-mistakes-preview');
+            dashMistakes.innerHTML = '';
+            if (appData.mistakes.length === 0) {
+                dashMistakes.innerHTML = `<p class="text-xs text-slate-400 italic">Chưa có ghi nhận lỗi sai nào. Tuyệt vời!</p>`;
+            } else {
+                appData.mistakes.slice(0, 2).forEach(m => {
+                    dashMistakes.innerHTML += `
+                        <div class="p-3 bg-rose-50/60 border border-rose-100 rounded-xl space-y-1 text-xs">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-rose-700 text-[11px]"><i class="fa-solid fa-triangle-exclamation mr-1"></i> [${m.course}] ${m.title}</span>
+                                <span class="text-[10px] ${m.fixed ? 'bg-emerald-100 text-emerald-700 font-bold' : 'bg-rose-100 text-rose-700 font-bold'} px-2 py-0.5 rounded">
+                                    ${m.fixed ? 'Đã hiểu ✓' : 'Cần xem lại'}
+                                </span>
+                            </div>
+                            <p class="text-slate-600 text-[11px] line-clamp-1"><strong class="text-slate-700">Khắc phục:</strong> ${m.solution}</p>
+                        </div>
+                    `;
+                });
+            }
+
+            // Render Mistakes Full Tab
+            const mistakesList = document.getElementById('mistakes-list');
+            mistakesList.innerHTML = '';
+            const query = (document.getElementById('mistake-search')?.value || '').toLowerCase();
+            const filteredMistakes = appData.mistakes.filter(m => 
+                m.course.toLowerCase().includes(query) ||
+                m.title.toLowerCase().includes(query) ||
+                m.reason.toLowerCase().includes(query)
+            );
+
+            if (filteredMistakes.length === 0) {
+                mistakesList.innerHTML = `
+                    <div class="p-8 text-center bg-white rounded-2xl border border-slate-200 text-slate-400 text-xs">
+                        <i class="fa-solid fa-circle-check text-2xl text-emerald-500 mb-2"></i>
+                        <p>Không tìm thấy lỗi sai nào trong hệ thống.</p>
+                    </div>
+                `;
+            } else {
+                filteredMistakes.forEach(m => {
+                    mistakesList.innerHTML += `
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="bg-rose-100 text-rose-700 font-extrabold text-xs px-2.5 py-1 rounded-lg">${m.course}</span>
+                                    <span class="text-xs text-slate-400 font-medium">Bài: ${m.task}</span>
+                                    <span class="text-[10px] text-slate-300">• ${m.date}</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="toggleMistakeFixed(${m.id})" class="text-xs font-bold px-3 py-1 rounded-xl transition-all ${m.fixed ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">
+                                        ${m.fixed ? '<i class="fa-solid fa-check mr-1"></i> Đã khắc phục' : 'Đánh dấu đã hiểu'}
+                                    </button>
+                                    <button onclick="deleteMistake(${m.id})" class="text-slate-300 hover:text-rose-500 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </div>
+
+                            <h4 class="font-bold text-slate-900 text-sm">${m.title}</h4>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1">
+                                    <span class="font-bold text-rose-600 uppercase text-[10px] tracking-wider block"><i class="fa-solid fa-bug mr-1"></i> Nguyên nhân & Code lỗi</span>
+                                    <p class="text-slate-700 font-mono text-[11px] leading-relaxed whitespace-pre-wrap">${m.reason}</p>
+                                </div>
+                                <div class="bg-emerald-50/60 p-3 rounded-xl border border-emerald-100 space-y-1">
+                                    <span class="font-bold text-emerald-700 uppercase text-[10px] tracking-wider block"><i class="fa-solid fa-lightbulb mr-1"></i> Cách khắc phục & Bài học</span>
+                                    <p class="text-slate-700 text-[11px] leading-relaxed whitespace-pre-wrap">${m.solution}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Render Task Lists
+            const filterVal = document.getElementById('task-filter') ? document.getElementById('task-filter').value : 'all';
+            let filteredTasks = appData.tasks;
+            if (filterVal === 'pending') filteredTasks = appData.tasks.filter(t => !t.completed);
+            if (filterVal === 'completed') filteredTasks = appData.tasks.filter(t => t.completed);
+
+            const renderTaskHTML = (task) => `
+                <div class="flex items-center justify-between p-3.5 rounded-xl border border-slate-100 hover:border-slate-200 transition-all bg-white">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTaskStatus(${task.id})" class="w-4 h-4 rounded text-orange-500 focus:ring-orange-500 cursor-pointer">
+                        <div>
+                            <h4 class="font-semibold text-xs sm:text-sm ${task.completed ? 'line-through text-slate-400' : 'text-slate-900'}">${task.title}</h4>
+                            <p class="text-[11px] text-slate-400">Môn: ${task.course} • <span class="text-rose-500 font-medium">Hạn: ${task.deadline}</span></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 bg-orange-50 text-orange-600 text-[10px] font-bold rounded-md">${task.priority}</span>
+                        <button onclick="deleteTask(${task.id})" class="text-slate-300 hover:text-rose-500 text-xs px-1"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('dashboard-task-list').innerHTML = appData.tasks.map(renderTaskHTML).join('');
+            document.getElementById('all-tasks-list').innerHTML = filteredTasks.map(renderTaskHTML).join('');
+
+            // Stats update
+            document.getElementById('stat-course-count').innerText = `${appData.courses.length} Môn`;
+            const pending = appData.tasks.filter(t => !t.completed).length;
+            document.getElementById('stat-pending-tasks').innerText = `${pending} Bài`;
+
+            // Courses Grid
+            const coursesGrid = document.getElementById('courses-grid');
+            coursesGrid.innerHTML = '';
+            appData.courses.forEach(c => {
+                coursesGrid.innerHTML += `
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3 relative">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-orange-100 text-orange-700 font-extrabold text-xs px-2.5 py-1 rounded-lg">${c.code}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-slate-400 font-medium">${c.credits} Tín chỉ</span>
+                                <button onclick="deleteCourse(${c.id})" class="text-slate-300 hover:text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <h4 class="font-bold text-slate-900 text-base">${c.name}</h4>
+                        <p class="text-xs text-slate-500"><i class="fa-solid fa-user-tie mr-1 text-slate-400"></i> ${c.teacher}</p>
+                        <div class="pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+                            <span class="text-slate-400">Điểm hiện tại:</span>
+                            <span class="font-bold text-orange-600 text-sm">${c.score || 'N/A'}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Notes Grid
+            const notesGrid = document.getElementById('notes-grid');
+            notesGrid.innerHTML = '';
+            appData.notes.forEach(note => {
+                notesGrid.innerHTML += `
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-bold bg-orange-100 text-orange-700 px-2.5 py-1 rounded-md">${note.course}</span>
+                            <button onclick="deleteNote(${note.id})" class="text-slate-300 hover:text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                        <h4 class="font-bold text-slate-900 text-base">${note.title}</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">${note.content}</p>
+                        <div class="text-[11px] text-slate-400 pt-2 border-t border-slate-100 flex justify-between">
+                            <span>Ngày tạo: ${note.date}</span>
+                            <span class="text-orange-500 font-semibold cursor-pointer">Tài liệu FPT K22</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // GPA Calculation
+            const gpaBody = document.getElementById('gpa-table-body');
+            gpaBody.innerHTML = '';
+            let totalCredits = 0;
+            let weightedScore = 0;
+
+            appData.courses.forEach(c => {
+                const gpa4 = c.score ? ((c.score / 10) * 4).toFixed(2) : 0;
+                totalCredits += Number(c.credits);
+                weightedScore += gpa4 * Number(c.credits);
+
+                gpaBody.innerHTML += `
+                    <tr class="font-medium">
+                        <td class="py-3 font-bold text-slate-800">${c.code} - ${c.name}</td>
+                        <td class="py-3 text-center">${c.credits}</td>
+                        <td class="py-3 text-center font-bold text-orange-600">${c.score || 'N/A'}</td>
+                        <td class="py-3 text-center font-bold">${gpa4}</td>
+                    </tr>
+                `;
+            });
+
+            const finalGpa = totalCredits ? (weightedScore / totalCredits).toFixed(2) : '0.00';
+            document.getElementById('calculated-gpa').innerText = finalGpa;
+            document.getElementById('dash-gpa-display').innerText = `${finalGpa} / 4.0`;
+        }
+
+        // Action Handlers
+        function toggleHabit(id) {
+            const h = appData.habits.find(item => item.id === id);
+            if (h) h.done = !h.done;
+            saveData();
+        }
+
+        function toggleTaskStatus(id) {
+            const task = appData.tasks.find(t => t.id === id);
+            if (task) task.completed = !task.completed;
+            saveData();
+        }
+
+        function toggleMistakeFixed(id) {
+            const mistake = appData.mistakes.find(m => m.id === id);
+            if (mistake) mistake.fixed = !mistake.fixed;
+            saveData();
+        }
+
+        function deleteTask(id) {
+            appData.tasks = appData.tasks.filter(t => t.id !== id);
+            saveData();
+        }
+
+        function deleteMistake(id) {
+            appData.mistakes = appData.mistakes.filter(m => m.id !== id);
+            saveData();
+        }
+
+        function deleteCourse(id) {
+            appData.courses = appData.courses.filter(c => c.id !== id);
+            saveData();
+        }
+
+        function deleteNote(id) {
+            appData.notes = appData.notes.filter(n => n.id !== id);
+            saveData();
+        }
+
+        // Modals Logic
+        function openAddMistakeModal() { document.getElementById('modal-add-mistake').classList.remove('hidden'); }
+        function closeAddMistakeModal() { document.getElementById('modal-add-mistake').classList.add('hidden'); }
+
+        function saveMistake() {
+            const course = document.getElementById('input-mistake-course').value;
+            const task = document.getElementById('input-mistake-task').value;
+            const title = document.getElementById('input-mistake-title').value;
+            const reason = document.getElementById('input-mistake-reason').value;
+            const solution = document.getElementById('input-mistake-solution').value;
+
+            if (title && course && reason) {
+                appData.mistakes.unshift({
+                    id: Date.now(),
+                    course: course.toUpperCase(),
+                    task: task || 'Bài tập FPT',
+                    title, reason, solution: solution || 'Cần chú ý ôn lại kiến thức này.',
+                    fixed: false,
+                    date: new Date().toLocaleDateString('vi-VN')
+                });
+                saveData();
+                closeAddMistakeModal();
+            }
+        }
+
+        function openAddTaskModal() { document.getElementById('modal-add-task').classList.remove('hidden'); }
+        function closeAddTaskModal() { document.getElementById('modal-add-task').classList.add('hidden'); }
+
+        function saveTask() {
+            const title = document.getElementById('input-task-title').value;
+            const course = document.getElementById('input-task-course').value;
+            const deadline = document.getElementById('input-task-deadline').value;
+
+            if (title && course) {
+                appData.tasks.push({
+                    id: Date.now(),
+                    title, course, deadline: deadline || 'Gần nhất',
+                    priority: 'High', completed: false
+                });
+                saveData();
+                closeAddTaskModal();
+            }
+        }
+
+        function openAddCourseModal() { document.getElementById('modal-add-course').classList.remove('hidden'); }
+        function closeAddCourseModal() { document.getElementById('modal-add-course').classList.add('hidden'); }
+
+        function saveCourse() {
+            const code = document.getElementById('input-course-code').value;
+            const name = document.getElementById('input-course-name').value;
+            const credits = document.getElementById('input-course-credits').value;
+            const score = document.getElementById('input-course-score').value;
+            const teacher = document.getElementById('input-course-teacher').value;
+
+            if (code && name) {
+                appData.courses.push({
+                    id: Date.now(), code: code.toUpperCase(), name,
+                    credits: Number(credits) || 3,
+                    score: Number(score) || 8.5,
+                    teacher: teacher || 'Giảng viên FPT'
+                });
+                saveData();
+                closeAddCourseModal();
+            }
+        }
+
+        function openAddNoteModal() { document.getElementById('modal-add-note').classList.remove('hidden'); }
+        function closeAddNoteModal() { document.getElementById('modal-add-note').classList.add('hidden'); }
+
+        function saveNote() {
+            const course = document.getElementById('input-note-course').value;
+            const title = document.getElementById('input-note-title').value;
+            const content = document.getElementById('input-note-content').value;
+
+            if (title && content) {
+                appData.notes.push({
+                    id: Date.now(), course: course ? course.toUpperCase() : 'FPT K22',
+                    title, content, date: new Date().toLocaleDateString('vi-VN')
+                });
+                saveData();
+                closeAddNoteModal();
+            }
+        }
+
+        // Pomodoro Timer Logic
+        let timerSeconds = 1500;
+        let timerInterval = null;
+
+        function toggleTimer() {
+            const btn = document.getElementById('btn-timer-toggle');
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                btn.innerHTML = '<i class="fa-solid fa-play mr-1"></i> Bắt đầu';
+            } else {
+                timerInterval = setInterval(() => {
+                    if (timerSeconds > 0) {
+                        timerSeconds--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(timerInterval);
+                        alert("Đã hết 25 phút tập trung! Kỳ Duyên hãy nghỉ ngơi chút nhé 🎉");
+                    }
+                }, 1000);
+                btn.innerHTML = '<i class="fa-solid fa-pause mr-1"></i> Tạm dừng';
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timerSeconds = 1500;
+            updateTimerDisplay();
+            document.getElementById('btn-timer-toggle').innerHTML = '<i class="fa-solid fa-play mr-1"></i> Bắt đầu';
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+            const secs = (timerSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('timer-display').innerText = `${mins}:${secs}`;
+        }
+
+        // Display current date in header
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date-display').innerText = new Date().toLocaleDateString('vi-VN', options);
+
+        // App Initialization
+        switchTab('dashboard');
+        renderData();
+    </script>
+</body>
+</html>
